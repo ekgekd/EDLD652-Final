@@ -1,0 +1,44 @@
+---
+title: "EDLD652 Final"
+author: "Diana Dewald, Eliott Doyle"
+date: "2/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(rio)
+library(here)
+
+#opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
+#data1 <- import(here("blogtext.csv"))
+#data1 <- data1[-(60000:681284),]
+#write.csv(data1, "blogtextabbr.csv")
+
+#reading in the new df with fewer observations
+data <- import(here("blogtextabbr.csv"))
+```
+
+```{r setup2, include=FALSE}
+data <- data %>% 
+  mutate(text = tolower(text))
+
+#View(data)
+
+m_age <- mean(data$age, na.rm = T)
+m_age
+max_age <- max(data$age, na.rm = T)
+max_age
+min_age <- min(data$age, na.rm = T)
+min_age
+
+data <- data %>% 
+  mutate(agegroup = cut(age, 
+                        breaks =c (-Inf, 19.9, 30, Inf), 
+                        labels=c("under20","20s","over30")))
+head(data)
+```
+
