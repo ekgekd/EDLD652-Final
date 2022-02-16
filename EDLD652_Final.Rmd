@@ -12,6 +12,7 @@ library(tidyverse)
 library(ggplot2)
 library(rio)
 library(here)
+library(tidytext)
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -23,6 +24,7 @@ data <- import(here("blogtextabbr.csv"))
 ```
 
 ```{r setup2, include=FALSE}
+#making all text in 'text' lowercase
 data <- data %>% 
   mutate(text = tolower(text))
 
@@ -35,10 +37,78 @@ max_age
 min_age <- min(data$age, na.rm = T)
 min_age
 
+#creating a new column with three groups for age
 data <- data %>% 
   mutate(agegroup = cut(age, 
                         breaks =c (-Inf, 19.9, 30, Inf), 
                         labels=c("under20","20s","over30")))
 head(data)
+```
+
+# Description of the data
+#### The data used for this project are from https://www.kaggle.com/rtatman/blog-authorship-corpus, a text dataset of approximately 681000 blogposts. For the purposes of this project, we will be working with one tenth of the full dataset. In addition to the text of each blog post, some information about each the post (topic, date posted) and blogger (gender, age, astrological sign) is included.
+
+# Research question 1:
+## What are the most frequently used words in all writing samples?
+
+```{r rq1, warning= FALSE, echo = FALSE}
+#parsing words from the 'text' column
+tidy_words <- data %>% 
+  unnest_tokens(word, text)
+tidy_words
+
+#removing numbers
+tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
+
+#removing 'nbsp' and 'urlink' - THIS DOESN"T WORK! not sure why currently
+#exclu <- tibble(word = c("nbsp","urlinkl"))
+#tidy_words <- tidy_words %>% 
+#  anti_join(exclu, by = "word")
+#head(tidy_words)
+
+#counting most frequently occurring words, removing stop words from counts
+tidy_words %>% 
+  anti_join(stop_words) %>%
+  count(word, sort = TRUE)
+
+#plot
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
+  slice(1:15) %>% # select only the first 15 rows
+  ggplot(aes(n, word)) +
+  geom_col(fill = "cornflowerblue") +
+  scale_x_continuous(expand = c(0,0)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+# Research question 2:
+## 
+
+```{r rq2, warning= FALSE, echo = FALSE}
+
+```
+
+
+
+
+
+# Research question 3:
+## Is there a relationship between blog post length and date posted? 
+## OR: How does frequency of use of the word "??" differ depending on ??
+
+```{r q3}
+
 ```
 
