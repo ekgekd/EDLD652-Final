@@ -13,6 +13,7 @@ library(ggplot2)
 library(rio)
 library(here)
 library(tidytext)
+library(RColorBrewer)
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -41,7 +42,7 @@ min_age
 data <- data %>% 
   mutate(agegroup = cut(age, 
                         breaks =c (-Inf, 19.9, 30, Inf), 
-                        labels=c("under20","20s","over30")))
+                        labels=c("Under 20","20s","Over 30")))
 head(data)
 ```
 
@@ -106,9 +107,54 @@ tidy_words %>%
 
 # Research question 3:
 ## Is there a relationship between blog post length and date posted? 
-## OR: How does frequency of use of the word "??" differ depending on ??
 
 ```{r q3}
+#new df, converting the date column to dates
+rq3 <- data
+rq3$date <- gsub(",", "/", rq3$date)
+#head(rq3)
+rq3$date <- gsub("January", "01", rq3$date)
+rq3$date <- gsub("February", "02", rq3$date)
+rq3$date <- gsub("March", "03", rq3$date)
+rq3$date <- gsub("April", "04", rq3$date)
+rq3$date <- gsub("May", "05", rq3$date)
+rq3$date <- gsub("June", "06", rq3$date)
+rq3$date <- gsub("July", "07", rq3$date)
+rq3$date <- gsub("August", "08", rq3$date)
+rq3$date <- gsub("September", "09", rq3$date)
+rq3$date <- gsub("October", "10", rq3$date)
+rq3$date <- gsub("November", "11", rq3$date)
+rq3$date <- gsub("December", "12", rq3$date)
+#head(rq3)
+rq3$date <- as.Date(rq3$date, format="%d/%m/%Y")
+#head(rq3)
+
+#word counts for each blog post
+#"cont of the number of words for every id/text/date combination"
+#"summing within id’s"
+rq3_plot <- rq3 %>% 
+  select(id, text, date, agegroup) %>% 
+  group_by(id, text, date, agegroup) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count,
+             colour = agegroup)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  scale_color_brewer(palette="Blues") +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_date(date_labels = "%Y", expand = c(0,0)) +
+  geom_smooth(method=lm, se=FALSE) +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Blogger by Date",
+    color = "Blogger Age"
+  ) 
+
+rq3_plot
 
 ```
+
 
