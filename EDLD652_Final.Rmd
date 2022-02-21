@@ -98,14 +98,14 @@ tidy_words %>%
   )
 ```
 
-# Research questions 2a: What are the most frequently used words by age group? Which words are unique to certain age groups?
+# Research questions 2a: 
+## What are the most frequently used words by age group? Which words are unique to certain age groups?
 
+Thing to add for final: color columns by words that are unique to each age group, as well as words that are used in only 2 age groups
 
 ```{r rq2a, warning= FALSE, echo = FALSE, message = FALSE}
 # separate words by valence (positive and negative)
 # separate words by categories (time, place, noun, feeling)?
-
-
 
 
 # what I tried initially to organize dataframe by age (wasn't ideal for plotting)
@@ -200,8 +200,32 @@ oldest <- data.frame(n_over30, over_30)
 ```
 
 
-# Research question 2b: What is the distribution of topics discussed?
+# Research question 2b: 
+## What is the distribution of topics discussed?
 
+Currently not sure what the largest category variable in the pie chart ('indUnk') means
+
+```{r rq2b, warning= FALSE, echo = FALSE, message = FALSE}
+
+tidy_words$topic <- as.factor(tidy_words$topic)
+# levels(tidy_words$topic)
+
+
+topics <- tidy_words %>% 
+  group_by(topic) %>%
+  summarise(topic_totals = n()) %>%
+  mutate(topic_percent = topic_totals / sum(topic_totals) * 100) %>%
+  slice(20, 36, 14, 37, 5, 15) %>%
+  ggplot(aes(x = "", y = topic_percent, fill = topic)) +
+  geom_col() +
+  coord_polar(theta = "y") + 
+  labs(title = "Proportion of blogs covering 5 most popular topics", 
+       x = "", y = "") +
+  theme_minimal()
+  
+topics
+
+```
 
 # Research question 3:
 ## Is there a relationship between blog post length and date posted? 
