@@ -1,0 +1,5 @@
+"0","words_under20 <- mutate(ifelse(tidy_words$agegroup == ""Under 20"", 1, 0))
+"
+"2","Error in UseMethod(""mutate"") : 
+  no applicable method for 'mutate' applied to an object of class ""c('double', 'numeric')""
+"
