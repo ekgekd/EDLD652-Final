@@ -2,8 +2,10 @@
 title: "EDLD652 Final"
 author: "Diana Dewald, Eliott Doyle"
 date: "2/10/2022"
-output: html_document
-editor_options: 
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -138,7 +140,7 @@ young <- data.frame(n_under20, under_20)
 
 
   ggplot(young, aes(n_under20, under_20)) +
-  geom_col(fill = unique_words) +
+  geom_col(fill = "lightpink4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
