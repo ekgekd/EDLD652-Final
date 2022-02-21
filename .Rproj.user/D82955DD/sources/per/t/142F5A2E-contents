@@ -101,12 +101,11 @@ tidy_words %>%
 # Research questions 2a: 
 ## What are the most frequently used words by age group? Which words are unique to certain age groups?
 
+Thing to add for final: color columns by words that are unique to each age group, as well as words that are used in only 2 age groups
 
 ```{r rq2a, warning= FALSE, echo = FALSE, message = FALSE}
 # separate words by valence (positive and negative)
 # separate words by categories (time, place, noun, feeling)?
-
-
 
 
 # what I tried initially to organize dataframe by age (wasn't ideal for plotting)
@@ -219,7 +218,10 @@ topics <- tidy_words %>%
   slice(20, 36, 14, 37, 5, 15) %>%
   ggplot(aes(x = "", y = topic_percent, fill = topic)) +
   geom_col() +
-  coord_polar(theta = "y")
+  coord_polar(theta = "y") + 
+  labs(title = "Proportion of blogs covering 5 most popular topics", 
+       x = "", y = "") +
+  theme_minimal()
   
 topics
 
