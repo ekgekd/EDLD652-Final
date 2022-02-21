@@ -3,6 +3,8 @@ title: "EDLD652 Final"
 author: "Diana Dewald, Eliott Doyle"
 date: "2/10/2022"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -52,25 +54,24 @@ head(data)
 # Research question 1:
 ## What are the most frequently used words in all writing samples?
 
-```{r rq1, warning= FALSE, echo = FALSE}
+```{r rq1, warning= FALSE, echo = FALSE, message = FALSE}
 #parsing words from the 'text' column
 tidy_words <- data %>% 
   unnest_tokens(word, text)
-tidy_words
 
 #removing numbers
 tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
 
-#removing 'nbsp' and 'urlink' - THIS DOESN"T WORK! not sure why currently
-#exclu <- tibble(word = c("nbsp","urlinkl"))
-#tidy_words <- tidy_words %>% 
-#  anti_join(exclu, by = "word")
-#head(tidy_words)
+#removing common/under-informative words
+exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol"))
+tidy_words <- tidy_words %>% 
+  anti_join(exclu, by = "word")
+head(tidy_words)
 
 #counting most frequently occurring words, removing stop words from counts
-tidy_words %>% 
-  anti_join(stop_words) %>%
-  count(word, sort = TRUE)
+# tidy_words %>% 
+#  anti_join(stop_words) %>%
+#  count(word, sort = TRUE)
 
 #plot
 tidy_words %>% 
@@ -94,21 +95,116 @@ tidy_words %>%
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
   )
 ```
-# Research question 2:
-## 
 
-```{r rq2, warning= FALSE, echo = FALSE}
+# Research questions 2a: What are the most frequently used words by age group? Which words are unique to certain age groups?
 
+
+```{r rq2a, warning= FALSE, echo = FALSE, message = FALSE}
+# separate words by valence (positive and negative)
+# separate words by categories (time, place, noun, feeling)?
+
+
+
+
+# what I tried initially to organize dataframe by age (wasn't ideal for plotting)
+# words_age <- tidy_words %>%
+#  mutate(under_20 = ifelse(agegroup == "Under 20", 1, 0),
+#         "20s" = ifelse(agegroup == "20s", 1, 0),
+#         over_30 = ifelse(agegroup == "Over 30", 1, 0)) %>%
+#  select(under_20, word)
+
+#also tried group_by(agegroup) in initial plot, this didn't work, nor did facet_wrap(~agegroup)
+#I know the code below is not the most elegant way to group by age, so I'm open to suggestions here
+
+
+# prepping data
+tidy <- tidy_words %>% 
+  group_by(agegroup) %>%
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% 
+  slice(1:15)
+
+age <- tidy %>%
+  distinct() %>%
+  pivot_wider(names_from = agegroup, values_from = word) 
+
+
+# plotting younget age group
+n_under20 <- age$n[1:15]
+under_20 <- age$`Under 20`[1:15]
+
+young <- data.frame(n_under20, under_20)
+
+
+  ggplot(young, aes(n_under20, under_20)) +
+  geom_col(fill = unique_words) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those under 20",
+  )
+
+
+# plotting middle age group--cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
+n_20s <- age$n[16:30]
+twenties <- age$`20s`[16:30]
+
+middle <- data.frame(n_20s, twenties)
+
+  ggplot(middle, aes(n_20s, twenties)) +
+  geom_col(fill = "aquamarine4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those 20-30",
+  )
+
+  
+# plotting the oldest age group--again, cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
+n_over30 <- age$n[31:45]
+over_30 <- age$`Over 30`[31:45]
+
+oldest <- data.frame(n_over30, over_30)
+
+  ggplot(oldest, aes(n_over30, over_30)) +
+  geom_col(fill = "lemonchiffon4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those over 30",
+  )
 ```
 
 
-
+# Research question 2b: What is the distribution of topics discussed?
 
 
 # Research question 3:
 ## Is there a relationship between blog post length and date posted? 
 
-```{r q3}
+```{r q3, warning= FALSE, echo = FALSE, message = FALSE}
 #new df, converting the date column to dates
 rq3 <- data
 rq3$date <- gsub(",", "/", rq3$date)
