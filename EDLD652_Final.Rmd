@@ -101,10 +101,11 @@ tidy_words %>%
 # Research questions 2a: 
 ## What are the most frequently used words by age group? Which words are unique to certain age groups?
 
-Thing to add for final: color columns by words that are unique to each age group, as well as words that are used in only 2 age groups
+### For Final:
+#### -color columns by words that are unique to each age group, as well as words that are used in only 2 age groups
 
 ```{r rq2a, warning= FALSE, echo = FALSE, message = FALSE}
-# separate words by valence (positive and negative)
+# separate words by valence (positive and negative)?
 # separate words by categories (time, place, noun, feeling)?
 
 
@@ -117,6 +118,8 @@ Thing to add for final: color columns by words that are unique to each age group
 
 #also tried group_by(agegroup) in initial plot, this didn't work, nor did facet_wrap(~agegroup)
 #I know the code below is not the most elegant way to group by age, so I'm open to suggestions here
+
+# note: I attempted to color bars by uniqueness (see 'for final' not above), but leftjoin() was giving me trouble
 
 
 # prepping data
@@ -203,7 +206,13 @@ oldest <- data.frame(n_over30, over_30)
 # Research question 2b: 
 ## What is the distribution of topics discussed?
 
-Currently not sure what the largest category variable in the pie chart ('indUnk') means
+
+
+### For Final:
+#### -Make percentages of each slice more clear in final pie chart (use pie() rather than coord_polar(theta)?)
+#### -Figure out what the largest category variable in the pie chart ('indUnk') means.
+
+
 
 ```{r rq2b, warning= FALSE, echo = FALSE, message = FALSE}
 
@@ -223,6 +232,7 @@ topics <- tidy_words %>%
        x = "", y = "") +
   theme_minimal()
   
+
 topics
 
 ```
@@ -278,5 +288,6 @@ rq3_plot <- rq3 %>%
 rq3_plot
 
 ```
+
 
 

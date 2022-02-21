@@ -3,7 +3,7 @@
     "path": "~/Oregon/edld 652/EDLD652-Final/EDLD652_Final.Rmd",
     "project_path": "EDLD652_Final.Rmd",
     "type": "r_markdown",
-    "hash": "1267840728",
+    "hash": "3285072020",
     "contents": "",
     "dirty": false,
     "created": 1645332850589.0,
@@ -12,17 +12,17 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "143,19",
-        "scrollLine": "143",
+        "cursorPosition": "291,0",
+        "scrollLine": "265",
         "last_setup_crc32": "",
         "chunk_output_type": "console"
     },
     "folds": "",
-    "lastKnownWriteTime": 1645462602,
+    "lastKnownWriteTime": 1645469235,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1645462602114,
+    "last_content_update": 1645469235910,
     "read_only": false,
     "read_only_alternatives": []
 }
