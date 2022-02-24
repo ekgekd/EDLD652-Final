@@ -76,6 +76,7 @@ head(tidy_words)
 #  count(word, sort = TRUE)
 
 #plot
+#NOTE: Cool plot! I added in a geom_text code on line 87 where you could add the numbers to each word to show how frequent they are (side note, couldn't get the nudge to work so you'd have to play with that but it could be a cool addition)
 tidy_words %>% 
   anti_join(stop_words) %>% 
   count(word, sort = TRUE) %>% 
@@ -83,6 +84,11 @@ tidy_words %>%
   slice(1:15) %>% # select only the first 15 rows
   ggplot(aes(n, word)) +
   geom_col(fill = "cornflowerblue") +
+  geom_text(
+    aes(n, word, label = round(n, 2)),
+    nudge_x = -2,
+    size = 4
+  ) +
   scale_x_continuous(expand = c(0,0)) +
   theme_minimal() +
   theme(
@@ -141,9 +147,14 @@ under_20 <- age$`Under 20`[1:15]
 
 young <- data.frame(n_under20, under_20)
 
-
+#NOTE: again thought it would be cool to leave in the number to the plot, maybe throughout if you have the same plots! Also thought it would be cool if you added in a ggtext to your title to color some words to match the col color. I added in some code below you could use for that. 
   ggplot(young, aes(n_under20, under_20)) +
   geom_col(fill = "lightpink4") +
+    geom_text(
+    aes(n_under20, under_20, label = round(n_under20, 2)),
+    nudge_x = -2,
+    size = 4
+  ) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -154,8 +165,9 @@ young <- data.frame(n_under20, under_20)
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those under 20",
-  )
+    title = "Top 15 most frequently occurring words for those <span style = 'color: lightpink4'>**Under 20**</span>",
+  ) +
+    theme(plot.title = ggtext::element_markdown()) 
 
 
 # plotting middle age group--cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
@@ -166,6 +178,11 @@ middle <- data.frame(n_20s, twenties)
 
   ggplot(middle, aes(n_20s, twenties)) +
   geom_col(fill = "aquamarine4") +
+  geom_text(
+    aes(n_20s, twenties, label = round(n_20s, 2)),
+    nudge_x = -2,
+    size = 4
+  ) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -176,8 +193,9 @@ middle <- data.frame(n_20s, twenties)
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those 20-30",
-  )
+    title = "Top 15 most frequently occurring words for those <span style = 'color: aquamarine4'>**20-30**</span>",
+  ) +
+    theme(plot.title = ggtext::element_markdown()) 
 
   
 # plotting the oldest age group--again, cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
@@ -188,6 +206,11 @@ oldest <- data.frame(n_over30, over_30)
 
   ggplot(oldest, aes(n_over30, over_30)) +
   geom_col(fill = "lemonchiffon4") +
+    geom_text(
+    aes(n_over30, over_30, label = round(n_over30, 2)),
+    nudge_x = -2,
+    size = 4
+  ) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -198,8 +221,9 @@ oldest <- data.frame(n_over30, over_30)
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those over 30",
-  )
+    title = "Top 15 most frequently occurring words for those <span style = 'color: lemonchiffon4'>**over 30**</span>",
+  ) +
+    theme(plot.title = ggtext::element_markdown()) 
 ```
 
 
@@ -264,6 +288,7 @@ rq3$date <- as.Date(rq3$date, format="%d/%m/%Y")
 #word counts for each blog post
 #"cont of the number of words for every id/text/date combination"
 #"summing within id’s"
+#NOTE: I changed the alpha just a small amount to make the lines more clear, it all seemed to bleed together a bit and this may clear it up while still showing all of the points! I also changed the title a bit to make it flow a little better, definitely not necessary just a recommendation. 
 rq3_plot <- rq3 %>% 
   select(id, text, date, agegroup) %>% 
   group_by(id, text, date, agegroup) %>% 
@@ -272,7 +297,7 @@ rq3_plot <- rq3 %>%
   ggplot(aes(x=date, 
              y=count,
              colour = agegroup)) +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .2) +
   theme_bw() +
   scale_color_brewer(palette="Blues") +
   scale_y_log10(labels = scales::comma) +
@@ -281,7 +306,7 @@ rq3_plot <- rq3 %>%
   labs(
     x = "Date Posted",
     y = "Number of Words",
-    title = "Word Count by Blogger by Date",
+    title = "Word Count by Blogger per Date Posted",
     color = "Blogger Age"
   ) 
 
@@ -290,4 +315,4 @@ rq3_plot
 ```
 
 
-
+WOW! Great flow of work! I like how you decided to use the data. I think there was a great progression throughout the project showing different aspects of the data in different ways. I think the use of multiple different plots was cool, I really liked the pie chart and how you used it, will be very neat when you have your final version I agreed with your notes to clarify the percentages. I made a few code suggestions for the geom_col to add in the number on the columns to show how many in each (although I was struggling to position it right), but if you can get that to work I think it would be a great addition to really display the data you are showing. I also thought adding in some ggtext to your titles would add to the visual of what you are plotting to connect the different colors of the columns to the age group you are presenting. There were some additoinal code suggestions I made notes on throughout your project but they are simply a suggestion, I think what you have is great just some different things that could add to the overall visual effect. Overall I loved this project I think you guys are on a great track and I cannot wait to see the final output! 
