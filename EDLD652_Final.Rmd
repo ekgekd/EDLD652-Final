@@ -35,7 +35,7 @@ data <- data %>%
 
 #View(data)
 
-m_age <- mean(data$age, na.rm = T)
+m_age <- mean(data$age, na.rm = T)  # did not know you can just use 'T', cool!
 m_age
 max_age <- max(data$age, na.rm = T)
 max_age
@@ -88,7 +88,10 @@ tidy_words %>%
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.x = element_blank(),
-    panel.grid.major.x = element_line(color = "gray80")
+    panel.grid.major.x = element_line(color = "gray80"),
+    axis.title.x = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", size =16)
   ) +
   labs(
     x = "Word Frequency",
@@ -96,6 +99,8 @@ tidy_words %>%
     title = "Top 15 most frequently occurring words across all blog posts",
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
   )
+
+### Cool code used, I had a hard time with string manipulation so glad to see that you are all able to incorporate for the project. I recommend polishing the fonts on axis and title like I added in your code above to make them pop more. Also recommend adding the actual value to time since it looks like it extends beyond the visual? Sorry, didn't add that code in.
 ```
 
 # Research questions 2a: 
@@ -108,6 +113,7 @@ tidy_words %>%
 # separate words by valence (positive and negative)?
 # separate words by categories (time, place, noun, feeling)?
 
+# I was thinking maybe you could do the same (what you said above) but not sure how to specify categories (can you tell if the word was meant positively or negatively?). Maybe by categories could be better?
 
 # what I tried initially to organize dataframe by age (wasn't ideal for plotting)
 # words_age <- tidy_words %>%
@@ -163,16 +169,21 @@ n_20s <- age$n[16:30]
 twenties <- age$`20s`[16:30]
 
 middle <- data.frame(n_20s, twenties)
+middle$n_20s <- as.double(middle$n_20s)
 
-  ggplot(middle, aes(n_20s, twenties)) +
+middle2 <- middle %>% 
+  arrange(desc(n_20s)) 
+
+middle2 %>% 
+  ggplot(aes(n_20s, twenties)) +
   geom_col(fill = "aquamarine4") +
   theme_minimal() +
-  scale_x_continuous(expand = c(0,0)) +
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.major.x = element_line(color = "gray80")
   ) +
+      scale_x_continuous(expand = c(0,0)) +
   labs(
     x = "Word Frequency",
     y = "Word",
@@ -200,6 +211,8 @@ oldest <- data.frame(n_over30, over_30)
     y = "Word",
     title = "Top 15 most frequently occurring words for those over 30",
   )
+  
+# Looking at the three age groups' visuals, the top 5 words are the same across. I don't know that highlighting unique words for each group (with gghighlight) would be good, as opposed to separating by categories as you mention. I also had trouble reordering by most to least. I even created another df in descending order and it wouldn't change the visual. :(
 ```
 
 
@@ -231,10 +244,11 @@ topics <- tidy_words %>%
   labs(title = "Proportion of blogs covering 5 most popular topics", 
        x = "", y = "") +
   theme_minimal()
-  
+
 
 topics
 
+# This is super neat, hadn't seen or even considered a pie chart. Great work on getting it this far. Adding in percentages of each would be a big plus to this! I was also wondering what 'indUnk' means.
 ```
 
 # Research question 3:
@@ -287,6 +301,7 @@ rq3_plot <- rq3 %>%
 
 rq3_plot
 
+# This plot is super cool and gets the message across! Love it. I think one thing to note is a comment somewhere to be aware of the y-axis and the scale there. Nice work!
 ```
 
 
