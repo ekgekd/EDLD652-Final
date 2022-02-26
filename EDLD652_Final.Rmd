@@ -134,6 +134,27 @@ age <- tidy %>%
   distinct() %>%
   pivot_wider(names_from = agegroup, values_from = word) 
 
+#MVC Peer review suggestion. Perhaps a way to show this is to facet wrap 
+# age group and then highlight similarities differences? I added here an 
+# example but this isn't order right, but just an idea how it could be like
+  ggplot(tidy,aes(n, reorder(word,n), group_by(agegroup))) +
+  geom_col(fill = "cornflowerblue") +
+  scale_x_continuous(expand = c(0,0)) +
+  facet_wrap(~agegroup) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+
+
 
 # plotting younget age group
 n_under20 <- age$n[1:15]
@@ -164,7 +185,8 @@ twenties <- age$`20s`[16:30]
 
 middle <- data.frame(n_20s, twenties)
 
-  ggplot(middle, aes(n_20s, twenties)) +
+# MVC PEER REVIEW: I added the reorder to your aes to help reorder your variables
+  ggplot(middle, aes(n_20s, reorder(twenties, n_20s))) +
   geom_col(fill = "aquamarine4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
@@ -186,7 +208,8 @@ over_30 <- age$`Over 30`[31:45]
 
 oldest <- data.frame(n_over30, over_30)
 
-  ggplot(oldest, aes(n_over30, over_30)) +
+# MVC PEER REVIEW: I added the reorder to your aes to help reorder your variables
+  ggplot(oldest, aes(n_over30, reorder(over_30,n_over30))) +
   geom_col(fill = "lemonchiffon4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
@@ -200,6 +223,10 @@ oldest <- data.frame(n_over30, over_30)
     y = "Word",
     title = "Top 15 most frequently occurring words for those over 30",
   )
+  
+  
+  
+
 ```
 
 
