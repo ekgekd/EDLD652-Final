@@ -83,7 +83,8 @@ tidy_words %>%
   slice(1:15) %>% # select only the first 15 rows
   ggplot(aes(n, word)) +
   geom_col(fill = "cornflowerblue") +
-  scale_x_continuous(expand = c(0,0)) +
+#just seeing what a log axis looks like here! Not very interesting at all...
+    scale_x_log10() +
   theme_minimal() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -121,9 +122,9 @@ tidy_words %>%
 
 # note: I attempted to color bars by uniqueness (see 'for final' not above), but leftjoin() was giving me trouble
 
+# possibility: would creating a vector like ageranges = c("<15","15-19",etc...) and sorting into there be an option? 
 
 # prepping data
-tidy <- tidy_words %>% 
   group_by(agegroup) %>%
   anti_join(stop_words) %>% 
   count(word, sort = TRUE) %>% 
@@ -135,7 +136,7 @@ age <- tidy %>%
   pivot_wider(names_from = agegroup, values_from = word) 
 
 
-# plotting younget age group
+# plotting youngest age group
 n_under20 <- age$n[1:15]
 under_20 <- age$`Under 20`[1:15]
 
