@@ -96,6 +96,9 @@ tidy_words %>%
     title = "Top 15 most frequently occurring words across all blog posts",
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
   )
+
+
+## This is really interesting - I wonder what your takeaway is here. This gives me the sense that people are v philosophical and musing on the nature of time and people and love and life. My main suggestion for this plot was going to be to try and show some of the differences in word use by different groups, which it looks like you're already doing in your next section, so excellent job of beating me to it!
 ```
 
 # Research questions 2a: 
@@ -142,7 +145,7 @@ under_20 <- age$`Under 20`[1:15]
 young <- data.frame(n_under20, under_20)
 
 
-  ggplot(young, aes(n_under20, under_20)) +
+young_plot <-   ggplot(young, aes(n_under20, under_20)) +
   geom_col(fill = "lightpink4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
@@ -157,14 +160,19 @@ young <- data.frame(n_under20, under_20)
     title = "Top 15 most frequently occurring words for those under 20",
   )
 
+young_plot
 
 # plotting middle age group--cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
+  
+  
+  ## wow i could not get the reordering to work either after 20 minutes of audibly arguing with my computer...
+  
 n_20s <- age$n[16:30]
 twenties <- age$`20s`[16:30]
 
 middle <- data.frame(n_20s, twenties)
 
-  ggplot(middle, aes(n_20s, twenties)) +
+mid_plot <-   ggplot(middle, aes(n_20s, twenties)) +
   geom_col(fill = "aquamarine4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
@@ -179,14 +187,15 @@ middle <- data.frame(n_20s, twenties)
     title = "Top 15 most frequently occurring words for those 20-30",
   )
 
-  
+mid_plot
+
 # plotting the oldest age group--again, cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
 n_over30 <- age$n[31:45]
 over_30 <- age$`Over 30`[31:45]
 
 oldest <- data.frame(n_over30, over_30)
 
-  ggplot(oldest, aes(n_over30, over_30)) +
+oldest_plot <-   ggplot(oldest, aes(n_over30, over_30)) +
   geom_col(fill = "lemonchiffon4") +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
@@ -200,6 +209,16 @@ oldest <- data.frame(n_over30, over_30)
     y = "Word",
     title = "Top 15 most frequently occurring words for those over 30",
   )
+oldest_plot
+
+
+
+## Here's a workaround for facet-gridding the plots that makes it a bit more straightforward to compare the plots. 
+#If you go with this method I'd recommend some retitling, and some highlighting or formatting to allow for comparing words across ages. For example, I might suggest using the same color for each word across groups, and unique colors for words that are only in one age group (now that I write that I think my idea is 1. a color for words in common across all groups 2. a color for words only common across 2 groups and 3. unique colors for each group for the words only they use)
+#Something like that, idk, but the idea would be to make it easier to emphasize what you think is most interesting about the combined plots
+library(ggpubr)
+ggarrange(young_plot, mid_plot, oldest_plot,
+                    ncol = 2, nrow = 2)
 ```
 
 
@@ -235,6 +254,8 @@ topics <- tidy_words %>%
 
 topics
 
+
+# For this plot it might help to expand what the indUnk topic means - I'm not sure I could guess the topic and it appears to be the most common topic. I know pie charts are not supposed to be a thing...but I kinda like how it conveys the information here. Another recommendation I might make that is *very subjective* is changing the color palette, maybe it's bc I'm enjoying the dark and cloudy day but these colors are very bright
 ```
 
 # Research question 3:
@@ -286,6 +307,10 @@ rq3_plot <- rq3 %>%
   ) 
 
 rq3_plot
+
+
+# This is really really cool. If there's any way to get data after 2004 I'd be suuuuper interested in seeing is the explosion of word count continues into the latter aughts. My prediction is that things peaked in the earlyish 2010's and we've moved to a pithier blog style since. Also, who are these people making one word blog posts?! So many questions come up with this plot, which underscores the fact that this is a really cool idea. If I were to suggest something beyond adding more data that you might not have access to, it would be to choose a color palette that has more contrast between the groups
+
 
 ```
 
