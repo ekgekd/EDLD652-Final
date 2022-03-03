@@ -1,0 +1,110 @@
+---
+title: "EDLD652 Final"
+author: "Diana Dewald, Eliott Doyle"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(tidyverse)
+library(ggplot2)
+library(rio)
+library(here)
+library(tidytext)
+library(RColorBrewer)
+
+#opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
+#data1 <- import(here("blogtext.csv"))
+#data1 <- data1[-(60000:681284),]
+#write.csv(data1, "blogtextabbr.csv")
+
+#reading in the new df with fewer observations
+data <- import(here("blogtextabbr.csv"))
+
+#making all text in 'text' lowercase
+data <- data %>% 
+  mutate(text = tolower(text))
+
+#View(data)
+
+m_age <- mean(data$age, na.rm = T)
+m_age
+max_age <- max(data$age, na.rm = T)
+max_age
+min_age <- min(data$age, na.rm = T)
+min_age
+
+#creating a new column with three groups for age
+data <- data %>% 
+  mutate(agegroup = cut(age, 
+                        breaks =c (-Inf, 19.9, 30, Inf), 
+                        labels=c("Under 20","20s","Over 30")))
+head(data)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r rq1, warning= FALSE, echo = FALSE, message = FALSE}
+#parsing words from the 'text' column
+tidy_words <- data %>% 
+  unnest_tokens(word, text)
+
+#removing numbers
+tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
+
+#removing common/under-informative words
+exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol"))
+tidy_words <- tidy_words %>% 
+  anti_join(exclu, by = "word")
+#head(tidy_words)
+
+#counting most frequently occurring words, removing stop words from counts
+# tidy_words %>% 
+#  anti_join(stop_words) %>%
+#  count(word, sort = TRUE)
+
+#plot
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
+  slice(1:15) %>% # select only the first 15 rows
+  ggplot(aes(n, word)) +
+  geom_col(fill = "cornflowerblue") +
+  scale_x_continuous(expand = c(0,0)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
