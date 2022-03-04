@@ -46,8 +46,11 @@ min_age
 data <- data %>% 
   mutate(agegroup = cut(age, 
                         breaks =c (-Inf, 19.9, 30, Inf), 
-                        labels=c("Under 20","20s","Over 30")))
-head(data)
+                        labels=c("Under 20","20s","Over 30"))) 
+
+# Such a useful function (cut)! I didn't know about it and wanted to similarly convert a continuous variable to a categorical one. This saved me from writing several ifelse statements!
+
+#head(data)
 ```
 
 # Description of the data
@@ -68,7 +71,8 @@ tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
 exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol"))
 tidy_words <- tidy_words %>% 
   anti_join(exclu, by = "word")
-head(tidy_words)
+#head(tidy_words)
+#I wonder why you removed "stuff" and "lol" from the list. It does seem like a useful word to me.
 
 #counting most frequently occurring words, removing stop words from counts
 # tidy_words %>% 
@@ -200,6 +204,8 @@ oldest <- data.frame(n_over30, over_30)
     y = "Word",
     title = "Top 15 most frequently occurring words for those over 30",
   )
+
+  #These were great! Loved the color choice too. I think if one could see all the groups together, that might be more informative, maybe a dodged histogram.
 ```
 
 
@@ -234,6 +240,8 @@ topics <- tidy_words %>%
   
 
 topics
+
+#This was good! The title says 5 most popular topics, but there are 7 in the legend. I'd also suggest to try a waffle plot if you have second thoughts about the pie chart. Maybe in a waffle plot, you can change each tile to represent the topic too.
 
 ```
 
@@ -287,6 +295,7 @@ rq3_plot <- rq3 %>%
 
 rq3_plot
 
+#This was cool. 
 ```
 
 
