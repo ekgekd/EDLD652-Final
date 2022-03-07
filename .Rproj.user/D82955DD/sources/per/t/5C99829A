@@ -1,0 +1,28 @@
+{
+    "id": "5C99829A",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1646663453762.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "id": "df4f4e0e64114c868d5c40732795d787",
+        "name": "slices",
+        "title": "slices",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1646661162,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1646663453762,
+    "read_only": false,
+    "read_only_alternatives": []
+}

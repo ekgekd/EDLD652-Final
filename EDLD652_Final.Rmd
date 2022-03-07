@@ -401,6 +401,27 @@ topics <- tidy_words %>%
 
 topics
 
+
+# 2nd attempt at pie chart
+
+topics <- tidy_words %>% 
+  group_by(topic) %>%
+  summarise(topic_totals = n()) %>%
+  mutate(topic_percent = topic_totals / sum(topic_totals) * 100)
+
+slices <-  c(34.95, 20.37, 6.09, 5.60, 5.30, 2.82)
+
+lbls <- c("Independent/Unknown", "Student", "Education", "Technology", "Arts", "Engineering")
+
+
+lbls <- paste(lbls, slices) # add percents to labels
+lbls <- paste(lbls,"%",sep="") # ad % to labels
+
+colors <- c("#8a2424", "#248a5a", "#8a7424", "#24278a", "#24808a", "#7c248a")
+
+topics_pie <- pie(slices,labels = lbls, col= colors,
+   main="Pie Chart of 6 Most Popular Blog Topics")
+
 ```
 
 # Research question 3:
