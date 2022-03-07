@@ -65,7 +65,7 @@ tidy_words <- data %>%
 tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
 
 #removing common/under-informative words
-exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol"))
+exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol", "yeah"))
 tidy_words <- tidy_words %>% 
   anti_join(exclu, by = "word")
 head(tidy_words)
@@ -97,6 +97,8 @@ tidy_words %>%
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
   )
 ```
+
+
 
 # Research questions 2a: 
 ## What are the most frequently used words by age group? Which words are unique to certain age groups?
@@ -135,7 +137,7 @@ age <- tidy %>%
   pivot_wider(names_from = agegroup, values_from = word) 
 
 
-# plotting younget age group
+# plotting youngest age group
 n_under20 <- age$n[1:15]
 under_20 <- age$`Under 20`[1:15]
 
@@ -158,6 +160,51 @@ young <- data.frame(n_under20, under_20)
   )
 
 
+# 2nd attempt for youngest age group
+  
+unique <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
+                     unique = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
+
+young_new <- left_join(young, unique, by = "under_20")
+young_new[["unique"]][is.na(young_new[["unique"]])] <- "All Groups"
+
+
+cbbPalette <- c("#ffc180", "#8a6824", "#238668",  "#843355")
+
+# fct_reorder(young_new$under_20, young_new$n_under20)
+
+young_new %>%
+  mutate(under_20 = reorder(under_20, n_under20)) %>%
+  ggplot(aes(n_under20, under_20)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  xlim(0, 10500) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those under 20",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_under20, under_20, label = paste (round(n_under20))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+# 3rd attempt for youngest age group
+
+
 # plotting middle age group--cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
 n_20s <- age$n[16:30]
 twenties <- age$`20s`[16:30]
@@ -178,8 +225,69 @@ middle <- data.frame(n_20s, twenties)
     y = "Word",
     title = "Top 15 most frequently occurring words for those 20-30",
   )
+  
+
+
+# 2nd attempt for middle age group
+middle %>%
+  mutate(twenties = reorder(twenties, n_20s)) %>%
+  ggplot(aes(n_20s, twenties)) +
+  geom_col(fill = "aquamarine4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those 20-30",
+  )
 
   
+
+# 3rd attempt middle age group
+  
+unique <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
+                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
+
+middle_new <- left_join(middle, unique, by = "twenties")
+middle_new[["unique"]][is.na(middle_new[["unique"]])] <- "All Groups"
+
+cbbPalette <- c("#238668", "#244b8a", "#843355")
+
+middle_new %>%
+  mutate(twenties = reorder(twenties, n_20s)) %>%
+  ggplot(aes(n_20s, twenties)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those 20-30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_20s, twenties, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+
+
 # plotting the oldest age group--again, cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
 n_over30 <- age$n[31:45]
 over_30 <- age$`Over 30`[31:45]
@@ -200,6 +308,64 @@ oldest <- data.frame(n_over30, over_30)
     y = "Word",
     title = "Top 15 most frequently occurring words for those over 30",
   )
+  
+  
+# 2nd attempt for oldest age group
+oldest %>%
+  mutate(over_30 = reorder(over_30, n_over30)) %>%
+  ggplot(aes(n_over30, over_30)) +
+  geom_col(fill = "lemonchiffon4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those over 30",
+  )
+
+
+# 3rd attempt oldest age group
+
+unique <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
+                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
+
+oldest_new <- left_join(oldest, unique, by = "over_30")
+oldest_new[["unique"]][is.na(oldest_new[["unique"]])] <- "All Groups"
+
+cbbPalette <- c("#8a5724", "#248a24", "#244b8a", "#843355")
+
+oldest_new %>%
+  mutate(over_30 = reorder(over_30, n_over30)) %>%
+  ggplot(aes(n_over30, over_30)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those over 30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_over30, over_30, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
 ```
 
 
