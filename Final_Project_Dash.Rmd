@@ -44,17 +44,9 @@ data <- data %>%
   mutate(agegroup = cut(age, 
                         breaks =c (-Inf, 19.9, 30, Inf), 
                         labels=c("Under 20","20s","Over 30")))
-head(data)
-```
+#head(data)
 
-# Page 1
 
-Column {data-width=650}
------------------------------------------------------------------------
-
-### Chart A
-
-```{r rq1, warning= FALSE, echo = FALSE, message = FALSE}
 #parsing words from the 'text' column
 tidy_words <- data %>% 
   unnest_tokens(word, text)
@@ -73,7 +65,72 @@ tidy_words <- tidy_words %>%
 #  anti_join(stop_words) %>%
 #  count(word, sort = TRUE)
 
-#plot
+#new df, converting the date column to dates
+rq3 <- data
+rq3$date <- gsub(",", "/", rq3$date)
+#head(rq3)
+rq3$date <- gsub("January", "01", rq3$date)
+rq3$date <- gsub("February", "02", rq3$date)
+rq3$date <- gsub("March", "03", rq3$date)
+rq3$date <- gsub("April", "04", rq3$date)
+rq3$date <- gsub("May", "05", rq3$date)
+rq3$date <- gsub("June", "06", rq3$date)
+rq3$date <- gsub("July", "07", rq3$date)
+rq3$date <- gsub("August", "08", rq3$date)
+rq3$date <- gsub("September", "09", rq3$date)
+rq3$date <- gsub("October", "10", rq3$date)
+rq3$date <- gsub("November", "11", rq3$date)
+rq3$date <- gsub("December", "12", rq3$date)
+#head(rq3)
+rq3$date <- as.Date(rq3$date, format="%d/%m/%Y")
+#head(rq3)
+```
+
+# RQ1
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r rq1v}
+#plot v3
+
+my_colors <- brewer.pal(4, "Blues")[2:4]
+
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, agegroup, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
+  slice(1:32) %>% # select only the first 20 rows
+  ggplot(aes(n, word, fill = agegroup)) +
+  geom_col(position = "stack",
+           alpha = .7) +
+  scale_x_continuous(expand = c(0,0),
+                     labels = scales::comma) +
+  theme_minimal() +
+  scale_fill_manual(values = my_colors) + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 20 most frequently occurring words across all blog posts",
+    fill = "Blogger Age",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r rq1v2, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v2
 tidy_words %>% 
   anti_join(stop_words) %>% 
   count(word, sort = TRUE) %>% 
@@ -96,22 +153,26 @@ tidy_words %>%
   )
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Chart B
-
-```{r}
-
-```
-
 ### Chart C
 
-```{r}
+```{r rq1v3, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v1
 
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  slice(1:15) %>% # select only the first 15 rows
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
 ```
 
-# Page 2
+# RQ2
 
 Column {data-width=650}
 -----------------------------------------------------------------------
@@ -137,15 +198,40 @@ Column {data-width=350}
 
 ```
 
-# Page 3
+# RQ3
 
 Column {data-width=650}
 -----------------------------------------------------------------------
 
 ### Chart A
 
-```{r}
+```{r rq3v3, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v3
+rq3_plot4 <- rq3 %>% 
+  select(id, text, date, agegroup, age) %>% 
+  group_by(id, text, date, agegroup, age) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count,
+             colour = age)) +
+  geom_point(alpha = .3) +
+  theme_classic() +
+  theme() +
+  scale_color_viridis(option = "plasma") +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_date(date_labels = "%Y", expand = c(0,0)) +
+  geom_smooth(method=lm, se=FALSE, color = "black", size = .5) +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Blogger by Date",
+    subtitle = "Bloggers in their 20s were the earliest to start blogging, but word counts are consistent across age group",
+    color = "Blogger Age",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus") +
+  facet_grid("agegroup")
 
+rq3_plot4
 ```
 
 Column {data-width=350}
@@ -153,12 +239,50 @@ Column {data-width=350}
 
 ### Chart B
 
-```{r}
+```{r rq3v2, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v2
+rq3_plot2 <- rq3 %>% 
+  select(id, text, date, agegroup) %>% 
+  group_by(id, text, date, agegroup) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count,
+             colour = agegroup)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  scale_color_brewer(palette="Blues") +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_date(date_labels = "%Y", expand = c(0,0)) +
+  geom_smooth(method=lm, se=FALSE) +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Blogger by Date",
+    color = "Blogger Age"
+  ) 
 
+rq3_plot2
 ```
 
 ### Chart C
 
-```{r}
+```{r rq3v1, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v1
+rq3_plot1 <- rq3 %>% 
+  select(text, date) %>% 
+  group_by(text, date) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Date"
+  ) 
 
+rq3_plot1
 ```
