@@ -16,6 +16,7 @@ library(rio)
 library(here)
 library(tidytext)
 library(RColorBrewer)
+library(viridis)
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -45,6 +46,8 @@ data <- data %>%
                         labels=c("Under 20","20s","Over 30")))
 head(data)
 ```
+
+# Page 1
 
 Column {data-width=650}
 -----------------------------------------------------------------------
@@ -108,3 +111,54 @@ Column {data-width=350}
 
 ```
 
+# Page 2
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
+# Page 3
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
