@@ -18,6 +18,7 @@ library(rio)
 library(here)
 library(tidytext)
 library(RColorBrewer)
+library(viridis)
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -115,16 +116,20 @@ tidy_words %>%
 ```{r rq1v3, warning= FALSE, echo = FALSE, message = FALSE}
 #View(tidy_words)
 
+my_colors <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
+
 tidy_words %>% 
   anti_join(stop_words) %>% 
-  count(word, sort = TRUE) %>% 
+  count(word, agegroup, sort = TRUE) %>% 
   mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
-  slice(1:20) %>% # select only the first 20 rows
-  ggplot(aes(n, word)) +
-  geom_col(alpha = .7) +
+  slice(1:32) %>% # select only the first 20 rows
+  ggplot(aes(n, word, fill = agegroup)) +
+  geom_col(position = "stack",
+           alpha = .7) +
   scale_x_continuous(expand = c(0,0),
                      labels = scales::comma) +
   theme_minimal() +
+  scale_fill_manual(values = my_colors) + 
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.x = element_blank(),
@@ -353,6 +358,7 @@ rq3_plot2
 ```{r}
 my_colors <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
 
+#not using this plot
 rq3_plot3 <- rq3 %>% 
   select(id, text, date, agegroup) %>% 
   group_by(id, text, date, agegroup) %>% 
@@ -379,9 +385,7 @@ rq3_plot3 <- rq3 %>%
 
 rq3_plot3
 
-library(viridis)
-
-rq3_plot3 <- rq3 %>% 
+rq3_plot4 <- rq3 %>% 
   select(id, text, date, agegroup, age) %>% 
   group_by(id, text, date, agegroup, age) %>% 
   unnest_tokens(word, text) %>% 
@@ -389,7 +393,7 @@ rq3_plot3 <- rq3 %>%
   ggplot(aes(x=date, 
              y=count,
              colour = age)) +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .3) +
   theme_classic() +
   theme() +
   scale_color_viridis(option = "plasma") +
@@ -405,5 +409,5 @@ rq3_plot3 <- rq3 %>%
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus") +
   facet_grid("agegroup")
 
-rq3_plot3
+rq3_plot4
 ```
