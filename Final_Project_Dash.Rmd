@@ -88,10 +88,29 @@ rq3$date <- as.Date(rq3$date, format="%d/%m/%Y")
 
 # RQ1
 
+---
+title: "EDLD652 Final"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** communicate the most frequently used words in the corpus to an audience of bloggers with no particular history with statistics. Ideally, the people who contributed to this corpus would be able to read this graph to learn more about the project they contributed to.
+
+**Draft 1:** Shows frequencies of the 15 most frequently occurring words. The words do not appear in any order, and there isn't a lot of aesthetic appeal.
+
+**Draft 2:** The words have been reordered to go from most common to least common of the 15 most common words so improve readability. I added some color, changed the theme, and removed some gridlines to improve aesthetic appeal, and removed the space between the words and the bars to help with visual flow.
+
+**Final version:** I added more words so that some of the words that appear only in the charts for RQ2 appear here as well, as a preview of the next visualizations. I also added age group to the variables being presented here, to show how popular each word is amount each age bracket — also as a nod to what will be shown in RQ2 and RQ3's visualizations. We can see that people in their 20s are using common words more often than people in their teens (who make up a similar proportion of the corpus) and people over 30 (who make up a smaller proportion of the corpus).
+
+
+
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Final Version
 
 ```{r rq1v}
 #plot v3
@@ -127,7 +146,7 @@ tidy_words %>%
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Draft 2
 
 ```{r rq1v2, warning= FALSE, echo = FALSE, message = FALSE}
 #plot v2
@@ -153,7 +172,7 @@ tidy_words %>%
   )
 ```
 
-### Chart C
+### Draft 1
 
 ```{r rq1v3, warning= FALSE, echo = FALSE, message = FALSE}
 #plot v1
@@ -200,10 +219,22 @@ Column {data-width=350}
 
 # RQ3
 
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** communicate the relationship between date, word count, and blogger age (if any relationship exists) to an audience of people who might have contributed to the corpus.
+
+**Draft 1:** Shows only total word count by date. This graph is somewhat misleading, because the word counts are affected by how many blog posts from the corpus were made on a given day: it is not necessarily that people suddenly started writing longer posts; there are just more posts being included after 2004. This visualization also does not have much visual appeal, and the y-axis is annoying to read.
+
+**Draft 2:** I added age group to the plot to add some visual interest through color. The axes have also been changed to give some more spread to the data (without making the y-axis log10, the data are mostly squished down at the bottom, with only a few outliars reaching up to 10k or 100k words)
+
+**Final version:** Since there was not much relationship between date posted and word count, I broke the visualization apart into three plots, one for each age group, and added age as a continuous variable within that to show more of the variety. What we can see now is that people in their 20s started making more blog posts at earlier dates (at least within this corpus) than people under 20 or over 30, suggesting that, if one were to look only at the early years of the dataset, 20-somethings would be overrepresented compared to the overall age breakdown of the dataset. I kept the trend lines for all three groups, although I think this is more informative in draft 2, since it is harder to compare their slops when they are not on the same plot. 
+
+
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Final Version
 
 ```{r rq3v3, warning= FALSE, echo = FALSE, message = FALSE}
 #plot v3
@@ -226,7 +257,6 @@ rq3_plot4 <- rq3 %>%
     x = "Date Posted",
     y = "Number of Words",
     title = "Word Count by Blogger by Date",
-    subtitle = "Bloggers in their 20s were the earliest to start blogging, but word counts are consistent across age group",
     color = "Blogger Age",
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus") +
   facet_grid("agegroup")
@@ -237,7 +267,7 @@ rq3_plot4
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Draft 2
 
 ```{r rq3v2, warning= FALSE, echo = FALSE, message = FALSE}
 #plot v2
@@ -265,7 +295,7 @@ rq3_plot2 <- rq3 %>%
 rq3_plot2
 ```
 
-### Chart C
+### Draft 1
 
 ```{r rq3v1, warning= FALSE, echo = FALSE, message = FALSE}
 #plot v1
