@@ -1,0 +1,740 @@
+---
+title: "EDLD652 Final"
+author: "Diana Dewald, Eliott Doyle"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(tidyverse)
+library(ggplot2)
+library(rio)
+library(here)
+library(tidytext)
+library(RColorBrewer)
+library(viridis)
+library(ggpubr)
+library(pier)
+
+# devtools::install_github("mrjoh3/pier")
+
+#opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
+#data1 <- import(here("blogtext.csv"))
+#data1 <- data1[-(60000:681284),]
+#write.csv(data1, "blogtextabbr.csv")
+
+#reading in the new df with fewer observations
+data <- import(here("blogtextabbr.csv"))
+
+#making all text in 'text' lowercase
+data <- data %>% 
+  mutate(text = tolower(text))
+
+#View(data)
+
+m_age <- mean(data$age, na.rm = T)
+m_age
+max_age <- max(data$age, na.rm = T)
+max_age
+min_age <- min(data$age, na.rm = T)
+min_age
+
+#creating a new column with three groups for age
+data <- data %>% 
+  mutate(agegroup = cut(age, 
+                        breaks =c (-Inf, 19.9, 30, Inf), 
+                        labels=c("Under 20","20s","Over 30")))
+#head(data)
+
+
+#parsing words from the 'text' column
+tidy_words <- data %>% 
+  unnest_tokens(word, text)
+
+#removing numbers
+tidy_words <- tidy_words[-grep("\\b\\d+\\b", tidy_words$word),]
+
+#removing common/under-informative words
+exclu <- tibble(word = c("nbsp","urllink", "lot", "â", "im", "pm", "blog", "stuff", "lol"))
+tidy_words <- tidy_words %>% 
+  anti_join(exclu, by = "word")
+#head(tidy_words)
+
+#counting most frequently occurring words, removing stop words from counts
+# tidy_words %>% 
+#  anti_join(stop_words) %>%
+#  count(word, sort = TRUE)
+
+#new df, converting the date column to dates
+rq3 <- data
+rq3$date <- gsub(",", "/", rq3$date)
+#head(rq3)
+rq3$date <- gsub("January", "01", rq3$date)
+rq3$date <- gsub("February", "02", rq3$date)
+rq3$date <- gsub("March", "03", rq3$date)
+rq3$date <- gsub("April", "04", rq3$date)
+rq3$date <- gsub("May", "05", rq3$date)
+rq3$date <- gsub("June", "06", rq3$date)
+rq3$date <- gsub("July", "07", rq3$date)
+rq3$date <- gsub("August", "08", rq3$date)
+rq3$date <- gsub("September", "09", rq3$date)
+rq3$date <- gsub("October", "10", rq3$date)
+rq3$date <- gsub("November", "11", rq3$date)
+rq3$date <- gsub("December", "12", rq3$date)
+#head(rq3)
+rq3$date <- as.Date(rq3$date, format="%d/%m/%Y")
+#head(rq3)
+```
+
+# RQ1
+
+---
+title: "EDLD652 Final"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** communicate the most frequently used words in the corpus to an audience of bloggers with no particular history with statistics. Ideally, the people who contributed to this corpus would be able to read this graph to learn more about the project they contributed to.
+
+**Draft 1:** Shows frequencies of the 15 most frequently occurring words. The words do not appear in any order, and there isn't a lot of aesthetic appeal.
+
+**Draft 2:** The words have been reordered to go from most common to least common of the 15 most common words so improve readability. I added some color, changed the theme, and removed some gridlines to improve aesthetic appeal, and removed the space between the words and the bars to help with visual flow.
+
+**Final version:** I added more words so that some of the words that appear only in the charts for RQ2 appear here as well, as a preview of the next visualizations. I also added age group to the variables being presented here, to show how popular each word is amount each age bracket — also as a nod to what will be shown in RQ2 and RQ3's visualizations. We can see that people in their 20s are using common words more often than people in their teens (who make up a similar proportion of the corpus) and people over 30 (who make up a smaller proportion of the corpus).
+
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Final Version
+
+```{r rq1v}
+#plot v3
+
+my_colors <- brewer.pal(4, "Blues")[2:4]
+
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, agegroup, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
+  slice(1:32) %>% # select only the first 20 rows
+  ggplot(aes(n, word, fill = agegroup)) +
+  geom_col(position = "stack",
+           alpha = .7) +
+  scale_x_continuous(expand = c(0,0),
+                     labels = scales::comma) +
+  theme_minimal() +
+  scale_fill_manual(values = my_colors) + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 20 most frequently occurring words across all blog posts",
+    fill = "Blogger Age",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Draft 2
+
+```{r rq1v2, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v2
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% # make y-axis ordered by n
+  slice(1:15) %>% # select only the first 15 rows
+  ggplot(aes(n, word)) +
+  geom_col(fill = "cornflowerblue") +
+  scale_x_continuous(expand = c(0,0)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+
+### Draft 1
+
+```{r rq1v3, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v1
+
+tidy_words %>% 
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  slice(1:15) %>% # select only the first 15 rows
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words across all blog posts",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus"
+  )
+```
+
+# RQ2A
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** communicate the relationship between word count and blogger age, including words that are used by all groups and words specific to one or two age groups.
+
+**Draft 1:** These were basic bar charts with flipped axes displaying word frequency by age group. While containing the most important information I wanted to include, there was a lot to improve upon here, by adding scales (i.e. filling by age group and taking out a few under-informative words). 
+
+**Draft 2:** I began by creating new palettes in order to show words that were used by all age groups, those only used by one age group, and those used by 2 age groups. I also tested the palette to see whether it was colorblind friendly. However, I was left feeling as though I could synthesize this information into a single plot with a better color palette. I checked whether the palettes I was using were colorblind safe, and although the first and third plots seemed okay, decided it made the most sense to use a gradient of a single color for the final plot--this was also part of the feedback we received during our presentation.
+
+**Final version:** For the final plot, I decided to combine the 3 age groups into a single figure (using ggarrange()) while keeping the axes separate, rather than creating a single figure with the same y-axis for all age groups. I also checked whether this figure was colorblind safe, and it performed better than all previous figures for protanopia, deuteranopia, and desaturated (black/white) conditions. While combining the legend may have added to cohesiveness, I kept the individual legends by each age group because it reduced cognitive load for defining fill within the individual figures.
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Final Version
+
+```{r q2a final, warning= FALSE, echo = FALSE, message = FALSE}
+tidy <- tidy_words %>% 
+  group_by(agegroup) %>%
+  anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = reorder(word, n)) %>% 
+  slice(1:15)
+
+age <- tidy %>%
+  distinct() %>%
+  pivot_wider(names_from = agegroup, values_from = word) 
+
+
+n_under20 <- age$n[1:15]
+under_20 <- age$`Under 20`[1:15]
+
+young <- data.frame(n_under20, under_20)
+
+unique1 <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
+                     unique1 = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
+
+young_new <- left_join(young, unique1, by = "under_20")
+young_new[["unique1"]][is.na(young_new[["unique1"]])] <- "All Groups"
+
+
+cbbPalette1 <- c("#774d99", "#9066b2", "#ab8cc5",  "#4a305f")
+
+
+young_new <- young_new %>%
+  mutate(under_20 = reorder(under_20, n_under20)) %>%
+  ggplot(aes(n_under20, under_20)) +
+  geom_col(aes(fill = unique1), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette1) +
+  xlim(0, 10500) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 words for those: Under 20",
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_under20, under_20, label = paste (round(n_under20))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+
+ n_20s <- age$n[16:30]
+twenties <- age$`20s`[16:30]
+
+
+middle <- data.frame(n_20s, twenties)
+
+unique2 <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
+                     unique2 = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
+
+middle_new <- left_join(middle, unique2, by = "twenties")
+middle_new[["unique2"]][is.na(middle_new[["unique2"]])] <- "All Groups"
+
+cbbPalette2 <- c("#ab8cc5", "#281a33", "#4a305f")
+
+middle_new <- middle_new %>%
+  mutate(twenties = reorder(twenties, n_20s)) %>%
+  ggplot(aes(n_20s, twenties)) +
+  geom_col(aes(fill = unique2), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette2) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "20-30",
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_20s, twenties, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+
+ n_over30 <- age$n[31:45]
+over_30 <- age$`Over 30`[31:45]
+
+oldest <- data.frame(n_over30, over_30)
+
+unique3 <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
+                     unique3 = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
+
+oldest_new <- left_join(oldest, unique3, by = "over_30")
+oldest_new[["unique3"]][is.na(oldest_new[["unique3"]])] <- "All Groups"
+
+cbbPalette3 <- c("#9066b2", "#201529", "#b396ca", "#4a305f")
+
+oldest_new <- oldest_new %>%
+  mutate(over_30 = reorder(over_30, n_over30)) %>%
+  ggplot(aes(n_over30, over_30)) +
+  geom_col(aes(fill = unique3), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette3) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Over 30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_over30, over_30, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  )
+
+
+
+final <- ggarrange(young_new, middle_new, oldest_new, legend = "right")
+final
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### 2nd Drafts
+
+```{r q2a draft2, warning= FALSE, echo = FALSE, message = FALSE}
+
+# 2nd draft youngest age group
+
+  #setup
+
+
+unique <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
+                     unique = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
+
+young_new <- left_join(young, unique, by = "under_20")
+young_new[["unique"]][is.na(young_new[["unique"]])] <- "All Groups"
+
+
+cbbPalette <- c("#ffc180", "#8a6824", "#238668",  "#843355")
+
+  #visual
+young_new %>%
+  mutate(under_20 = reorder(under_20, n_under20)) %>%
+  ggplot(aes(n_under20, under_20)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  xlim(0, 10500) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those under 20",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_under20, under_20, label = paste (round(n_under20))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+# 2nd draft of middle age group
+
+
+  # setup
+unique <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
+                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
+
+middle_new <- left_join(middle, unique, by = "twenties")
+middle_new[["unique"]][is.na(middle_new[["unique"]])] <- "All Groups"
+
+cbbPalette <- c("#238668", "#244b8a", "#843355")
+
+  # visual
+middle_new %>%
+  mutate(twenties = reorder(twenties, n_20s)) %>%
+  ggplot(aes(n_20s, twenties)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those 20-30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_20s, twenties, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+# 2nd draft oldest age group
+
+  # setup 
+
+unique <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
+                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
+
+oldest_new <- left_join(oldest, unique, by = "over_30")
+oldest_new[["unique"]][is.na(oldest_new[["unique"]])] <- "All Groups"
+
+cbbPalette <- c("#8a5724", "#248a24", "#244b8a", "#843355")
+
+# visual
+oldest_new %>%
+  mutate(over_30 = reorder(over_30, n_over30)) %>%
+  ggplot(aes(n_over30, over_30)) +
+  geom_col(aes(fill = unique), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those over 30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_over30, over_30, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+```
+
+### 1st Drafts
+
+```{r q2a draft1, warning= FALSE, echo = FALSE, message = FALSE}
+
+# 1st draft youngest age group
+  ggplot(young, aes(n_under20, under_20)) +
+  geom_col(fill = "lightpink4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those under 20",
+  )
+  
+  
+# 1st draft middle age group
+  ggplot(middle, aes(n_20s, twenties)) +
+  geom_col(fill = "aquamarine4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those 20-30",
+  )
+  
+  
+  
+# 1st draft of oldest age group
+  ggplot(oldest, aes(n_over30, over_30)) +
+  geom_col(fill = "lemonchiffon4") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 most frequently occurring words for those over 30",
+  )
+  
+```
+
+
+# RQ2B
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** describe the proportion of topics which were addressed the most.
+
+**Draft 1:** Created a pie chart using ggplot and coord_polar(theta = "y"), which showed the proportions relative to one another but not enough information was included here (no percentages and labelling needed work).
+
+**Draft 2:** I opted to use the pie() function because I knew how to add labels and percentages with this function, making the plot more informative and reducing cognitive load. I also changed the color palette based upon feedback from our peer review
+
+**Final version:** I used yet another package and set of functions, which elevated the plot aesthetically (although it prints a little funny--cutting off the far right text). I kept the color palette as it allows for the most contrast between groups, and believe this plot does the best job out of the 3 pie charts of displaying the most popular topics.
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Final Version
+
+```{r q2b final, warning= FALSE, echo = FALSE, message = FALSE}
+tidy_words$topic <- as.factor(tidy_words$topic)
+
+
+
+data.frame(value = c(34.95, 20.37, 6.09, 5.60, 5.30, 2.82),
+           label = c("Independent/Unknown", "Student", "Education", "Technology", "Arts", "Engineering"),
+           color = c("#8a2424", "#248a5a", "#8a7424", "#24278a", "#24808a", "#7c248a")) %>%
+  pier() %>%
+  pie.header(text = 'Six Most Popular Blog Topics In 2001-2004 Corpus', font = 'Impact',
+             size = 18, colour = 'grey',
+             location = 'top-center') %>%
+  pie.subtitle('75% of Total Topics: https://www.kaggle.com/rtatman/blog-authorship-corpus')
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Draft 2
+
+```{r q2b draft2, warning= FALSE, echo = FALSE, message = FALSE}
+
+topics <- tidy_words %>% 
+  group_by(topic) %>%
+  summarise(topic_totals = n()) %>%
+  mutate(topic_percent = topic_totals / sum(topic_totals) * 100)
+
+slices <-  c(34.95, 20.37, 6.09, 5.60, 5.30, 2.82)
+
+lbls <- c("Independent/Unknown", "Student", "Education", "Technology", "Arts", "Engineering")
+
+
+lbls <- paste(lbls, slices) # add percents to labels
+lbls <- paste(lbls,"%",sep="") # ad % to labels
+
+colors <- c("#8a2424", "#248a5a", "#8a7424", "#24278a", "#24808a", "#7c248a")
+
+topics_pie <- pie(slices,labels = lbls, col= colors,
+   main="Pie Chart of 6 Most Popular Blog Topics")
+
+```
+
+### Draft 1
+
+```{rq2b draft1}
+
+topics_1 <- tidy_words %>% 
+  group_by(topic) %>%
+  summarise(topic_totals = n()) %>%
+  mutate(topic_percent = topic_totals / sum(topic_totals) * 100) %>%
+  slice(20, 36, 14, 37, 5, 15) %>%
+  ggplot(aes(x = "", y = topic_percent, fill = topic)) +
+  geom_col() +
+  coord_polar(theta = "y") + 
+  labs(title = "Proportion of blogs covering 5 most popular topics", 
+       x = "", y = "") +
+  theme_minimal()
+  
+
+topics_1
+
+```
+
+
+
+
+# RQ3
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+**Goal:** communicate the relationship between date, word count, and blogger age (if any relationship exists) to an audience of people who might have contributed to the corpus.
+
+**Draft 1:** Shows only total word count by date. This graph is somewhat misleading, because the word counts are affected by how many blog posts from the corpus were made on a given day: it is not necessarily that people suddenly started writing longer posts; there are just more posts being included after 2004. This visualization also does not have much visual appeal, and the y-axis is annoying to read.
+
+**Draft 2:** I added age group to the plot to add some visual interest through color. The axes have also been changed to give some more spread to the data (without making the y-axis log10, the data are mostly squished down at the bottom, with only a few outliars reaching up to 10k or 100k words)
+
+**Final version:** Since there was not much relationship between date posted and word count, I broke the visualization apart into three plots, one for each age group, and added age as a continuous variable within that to show more of the variety. What we can see now is that people in their 20s started making more blog posts at earlier dates (at least within this corpus) than people under 20 or over 30, suggesting that, if one were to look only at the early years of the dataset, 20-somethings would be overrepresented compared to the overall age breakdown of the dataset. I kept the trend lines for all three groups, although I think this is more informative in draft 2, since it is harder to compare their slops when they are not on the same plot. 
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Final Version
+
+```{r rq3v3, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v3
+rq3_plot4 <- rq3 %>% 
+  select(id, text, date, agegroup, age) %>% 
+  group_by(id, text, date, agegroup, age) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count,
+             colour = age)) +
+  geom_point(alpha = .3) +
+  theme_classic() +
+  theme() +
+  scale_color_viridis(option = "plasma") +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_date(date_labels = "%Y", expand = c(0,0)) +
+  geom_smooth(method=lm, se=FALSE, color = "black", size = .5) +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Blogger by Date",
+    color = "Blogger Age",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus") +
+  facet_grid("agegroup")
+
+rq3_plot4
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Draft 2
+
+```{r rq3v2, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v2
+rq3_plot2 <- rq3 %>% 
+  select(id, text, date, agegroup) %>% 
+  group_by(id, text, date, agegroup) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count,
+             colour = agegroup)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  scale_color_brewer(palette="Blues") +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_date(date_labels = "%Y", expand = c(0,0)) +
+  geom_smooth(method=lm, se=FALSE) +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Blogger by Date",
+    color = "Blogger Age"
+  ) 
+
+rq3_plot2
+```
+
+### Draft 1
+
+```{r rq3v1, warning= FALSE, echo = FALSE, message = FALSE}
+#plot v1
+rq3_plot1 <- rq3 %>% 
+  select(text, date) %>% 
+  group_by(text, date) %>% 
+  unnest_tokens(word, text) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=date, 
+             y=count)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  labs(
+    x = "Date Posted",
+    y = "Number of Words",
+    title = "Word Count by Date"
+  ) 
+
+rq3_plot1
+```

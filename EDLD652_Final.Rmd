@@ -6,7 +6,7 @@ output:
   html_document: default
   pdf_document: default
 editor_options:
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +18,7 @@ library(rio)
 library(here)
 library(tidytext)
 library(RColorBrewer)
+library(ggpubr)
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -119,9 +120,7 @@ tidy_words %>%
 #  select(under_20, word)
 
 #also tried group_by(agegroup) in initial plot, this didn't work, nor did facet_wrap(~agegroup)
-#I know the code below is not the most elegant way to group by age, so I'm open to suggestions here
 
-# note: I attempted to color bars by uniqueness (see 'for final' not above), but leftjoin() was giving me trouble
 
 
 # prepping data
@@ -162,21 +161,21 @@ young <- data.frame(n_under20, under_20)
 
 # 2nd attempt for youngest age group
   
-unique <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
-                     unique = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
+unique1 <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
+                     unique1 = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
 
-young_new <- left_join(young, unique, by = "under_20")
-young_new[["unique"]][is.na(young_new[["unique"]])] <- "All Groups"
+young_new <- left_join(young, unique1, by = "under_20")
+young_new[["unique1"]][is.na(young_new[["unique1"]])] <- "All Groups"
 
 
-cbbPalette <- c("#ffc180", "#8a6824", "#238668",  "#843355")
+cbbPalette1 <- c("#774d99", "#9066b2", "#ab8cc5",  "#4a305f")
 
 # fct_reorder(young_new$under_20, young_new$n_under20)
 
-young_new %>%
+young_new <- young_new %>%
   mutate(under_20 = reorder(under_20, n_under20)) %>%
   ggplot(aes(n_under20, under_20)) +
-  geom_col(aes(fill = unique), alpha = 0.6) +
+  geom_col(aes(fill = unique1), alpha = 0.6) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -185,13 +184,12 @@ young_new %>%
     panel.grid.major.x = element_line(color = "gray80")
   ) +
   theme(plot.caption = element_text(hjust = 0)) +
-  scale_fill_manual(values=cbbPalette) +
+  scale_fill_manual(values=cbbPalette1) +
   xlim(0, 10500) +
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those under 20",
-    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    title = "Top 15 most frequently occurring words for those: Under 20",
     fill = "Unique words by group"
   ) +
   geom_text(
@@ -201,11 +199,13 @@ young_new %>%
     hjust = 'right'
   ) 
 
+young_new
+
 
 # 3rd attempt for youngest age group
 
 
-# plotting middle age group--cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
+# plotting middle age group
 n_20s <- age$n[16:30]
 twenties <- age$`20s`[16:30]
 
@@ -246,22 +246,21 @@ middle %>%
     title = "Top 15 most frequently occurring words for those 20-30",
   )
 
-  
 
 # 3rd attempt middle age group
   
-unique <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
-                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
+unique2 <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
+                     unique2 = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
 
-middle_new <- left_join(middle, unique, by = "twenties")
-middle_new[["unique"]][is.na(middle_new[["unique"]])] <- "All Groups"
+middle_new <- left_join(middle, unique2, by = "twenties")
+middle_new[["unique2"]][is.na(middle_new[["unique2"]])] <- "All Groups"
 
-cbbPalette <- c("#238668", "#244b8a", "#843355")
+cbbPalette2 <- c("#ab8cc5", "#281a33", "#4a305f")
 
-middle_new %>%
+middle_new <- middle_new %>%
   mutate(twenties = reorder(twenties, n_20s)) %>%
   ggplot(aes(n_20s, twenties)) +
-  geom_col(aes(fill = unique), alpha = 0.6) +
+  geom_col(aes(fill = unique2), alpha = 0.6) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -270,12 +269,11 @@ middle_new %>%
     panel.grid.major.x = element_line(color = "gray80")
   ) +
   theme(plot.caption = element_text(hjust = 0)) +
-  scale_fill_manual(values=cbbPalette) +
+  scale_fill_manual(values=cbbPalette2) +
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those 20-30",
-    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    title = "20-30",
     fill = "Unique words by group"
   ) +
   geom_text(
@@ -285,10 +283,10 @@ middle_new %>%
     hjust = 'right'
   ) 
 
+middle_new
 
 
-
-# plotting the oldest age group--again, cannot get the re-ordering to cooperate here for the y-axis, tried several solutions to no avail, any edits welcome
+# plotting the oldest age group--again
 n_over30 <- age$n[31:45]
 over_30 <- age$`Over 30`[31:45]
 
@@ -331,18 +329,18 @@ oldest %>%
 
 # 3rd attempt oldest age group
 
-unique <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
-                     unique = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
+unique3 <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
+                     unique3 = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
 
-oldest_new <- left_join(oldest, unique, by = "over_30")
-oldest_new[["unique"]][is.na(oldest_new[["unique"]])] <- "All Groups"
+oldest_new <- left_join(oldest, unique3, by = "over_30")
+oldest_new[["unique3"]][is.na(oldest_new[["unique3"]])] <- "All Groups"
 
-cbbPalette <- c("#8a5724", "#248a24", "#244b8a", "#843355")
+cbbPalette3 <- c("#9066b2", "#201529", "#b396ca", "#4a305f")
 
-oldest_new %>%
+oldest_new <- oldest_new %>%
   mutate(over_30 = reorder(over_30, n_over30)) %>%
   ggplot(aes(n_over30, over_30)) +
-  geom_col(aes(fill = unique), alpha = 0.6) +
+  geom_col(aes(fill = unique3), alpha = 0.6) +
   theme_minimal() +
   scale_x_continuous(expand = c(0,0)) +
   theme(
@@ -351,11 +349,11 @@ oldest_new %>%
     panel.grid.major.x = element_line(color = "gray80")
   ) +
   theme(plot.caption = element_text(hjust = 0)) +
-  scale_fill_manual(values=cbbPalette) +
+  scale_fill_manual(values=cbbPalette3) +
   labs(
     x = "Word Frequency",
     y = "Word",
-    title = "Top 15 most frequently occurring words for those over 30",
+    title = "Over 30",
     caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
     fill = "Unique words by group"
   ) +
@@ -364,8 +362,25 @@ oldest_new %>%
     nudge_x = 0,
     size = 2.7, 
     hjust = 'right'
-  ) 
+  )
 
+oldest_new
+
+# checking colorblind safeness
+colorBlindness::cvdPlot(young_new)
+
+colorBlindness::cvdPlot(middle_new)
+
+colorBlindness::cvdPlot(oldest_new)
+
+# final
+
+final <- ggarrange(young_new, middle_new, oldest_new, legend = "right")
+final
+
+
+
+colorBlindness::cvdPlot(final)
 ```
 
 
@@ -373,17 +388,10 @@ oldest_new %>%
 ## What is the distribution of topics discussed?
 
 
-
-### For Final:
-#### -Make percentages of each slice more clear in final pie chart (use pie() rather than coord_polar(theta)?)
-#### -Figure out what the largest category variable in the pie chart ('indUnk') means.
-
-
-
 ```{r rq2b, warning= FALSE, echo = FALSE, message = FALSE}
 
+# 1st attempt at pie chart
 tidy_words$topic <- as.factor(tidy_words$topic)
-# levels(tidy_words$topic)
 
 
 topics <- tidy_words %>% 

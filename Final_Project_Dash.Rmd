@@ -19,6 +19,10 @@ library(here)
 library(tidytext)
 library(RColorBrewer)
 library(viridis)
+library(ggpubr)
+library(pier)
+
+# devtools::install_github("mrjoh3/pier")
 
 #opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file 
 #data1 <- import(here("blogtext.csv"))
@@ -200,11 +204,11 @@ Inputs {.sidebar}
 
 **Goal:** communicate the relationship between word count and blogger age, including words that are used by all groups and words specific to one or two age groups.
 
-**Draft 1:** These were basic bar charts with flipped axes displaying word frequency by age group. While containing the most important information I wanted to include, there was a lot to improve upon here, by adding scales (i.e. filling by age group and taking out a few under-informative words).
+**Draft 1:** These were basic bar charts with flipped axes displaying word frequency by age group. While containing the most important information I wanted to include, there was a lot to improve upon here, by adding scales (i.e. filling by age group and taking out a few under-informative words). 
 
-**Draft 2:** I began by creating new palettes in order to show words that were used by all age groups, those only used by one age group, and those used by 2 age groups. I also tested the palette to see whether it was colorblind friendly. However, I was left feeling as though I could synthesize this information into a single plot with a better color palette. also discuss presentation feedback___
+**Draft 2:** I began by creating new palettes in order to show words that were used by all age groups, those only used by one age group, and those used by 2 age groups. I also tested the palette to see whether it was colorblind friendly. However, I was left feeling as though I could synthesize this information into a single plot with a better color palette. I checked whether the palettes I was using were colorblind safe, and although the first and third plots seemed okay, decided it made the most sense to use a gradient of a single color for the final plot--this was also part of the feedback we received during our presentation.
 
-**Final version:** 
+**Final version:** For the final plot, I decided to combine the 3 age groups into a single figure (using ggarrange()) while keeping the axes separate, rather than creating a single figure with the same y-axis for all age groups. I also checked whether this figure was colorblind safe, and it performed better than all previous figures for protanopia, deuteranopia, and desaturated (black/white) conditions. While combining the legend may have added to cohesiveness, I kept the individual legends by each age group because it reduced cognitive load for defining fill within the individual figures.
 
 
 Column {data-width=650}
@@ -225,6 +229,137 @@ age <- tidy %>%
   pivot_wider(names_from = agegroup, values_from = word) 
 
 
+n_under20 <- age$n[1:15]
+under_20 <- age$`Under 20`[1:15]
+
+young <- data.frame(n_under20, under_20)
+
+unique1 <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
+                     unique1 = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
+
+young_new <- left_join(young, unique1, by = "under_20")
+young_new[["unique1"]][is.na(young_new[["unique1"]])] <- "All Groups"
+
+
+cbbPalette1 <- c("#774d99", "#9066b2", "#ab8cc5",  "#4a305f")
+
+
+young_new <- young_new %>%
+  mutate(under_20 = reorder(under_20, n_under20)) %>%
+  ggplot(aes(n_under20, under_20)) +
+  geom_col(aes(fill = unique1), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette1) +
+  xlim(0, 10500) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Top 15 words for those: Under 20",
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_under20, under_20, label = paste (round(n_under20))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+
+ n_20s <- age$n[16:30]
+twenties <- age$`20s`[16:30]
+
+
+middle <- data.frame(n_20s, twenties)
+
+unique2 <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
+                     unique2 = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
+
+middle_new <- left_join(middle, unique2, by = "twenties")
+middle_new[["unique2"]][is.na(middle_new[["unique2"]])] <- "All Groups"
+
+cbbPalette2 <- c("#ab8cc5", "#281a33", "#4a305f")
+
+middle_new <- middle_new %>%
+  mutate(twenties = reorder(twenties, n_20s)) %>%
+  ggplot(aes(n_20s, twenties)) +
+  geom_col(aes(fill = unique2), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette2) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "20-30",
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_20s, twenties, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  ) 
+
+
+
+ n_over30 <- age$n[31:45]
+over_30 <- age$`Over 30`[31:45]
+
+oldest <- data.frame(n_over30, over_30)
+
+unique3 <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
+                     unique3 = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
+
+oldest_new <- left_join(oldest, unique3, by = "over_30")
+oldest_new[["unique3"]][is.na(oldest_new[["unique3"]])] <- "All Groups"
+
+cbbPalette3 <- c("#9066b2", "#201529", "#b396ca", "#4a305f")
+
+oldest_new <- oldest_new %>%
+  mutate(over_30 = reorder(over_30, n_over30)) %>%
+  ggplot(aes(n_over30, over_30)) +
+  geom_col(aes(fill = unique3), alpha = 0.6) +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_line(color = "gray80")
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) +
+  scale_fill_manual(values=cbbPalette3) +
+  labs(
+    x = "Word Frequency",
+    y = "Word",
+    title = "Over 30",
+    caption = "Data abbreviated from https://www.kaggle.com/rtatman/blog-authorship-corpus", 
+    fill = "Unique words by group"
+  ) +
+  geom_text(
+    aes(n_over30, over_30, label = paste (round(n_20s))),
+    nudge_x = 0,
+    size = 2.7, 
+    hjust = 'right'
+  )
+
+
+
+final <- ggarrange(young_new, middle_new, oldest_new, legend = "right")
+final
+
 ```
 
 Column {data-width=350}
@@ -237,10 +372,7 @@ Column {data-width=350}
 # 2nd draft youngest age group
 
   #setup
-n_under20 <- age$n[1:15]
-under_20 <- age$`Under 20`[1:15]
 
-young <- data.frame(n_under20, under_20)
 
 unique <- data.frame(under_20 = c('school', 'fun', 'friends', 'pretty', 'bad', 'guess','god'),
                      unique = c('<20, >30', '<20', '<20, 20s', '<20, 20s', '<20, 20s', '<20', '<20, 20s'))
@@ -282,13 +414,8 @@ young_new %>%
 
 # 2nd draft of middle age group
 
+
   # setup
- n_20s <- age$n[16:30]
-twenties <- age$`20s`[16:30]
-
-middle <- data.frame(n_20s, twenties)
-
-  # visual
 unique <- data.frame(twenties = c('week', 'days', 'world', 'friends', 'pretty', 'bad','god'),
                      unique = c('20s, >30', '20s, >30', '20s, >30', '<20, 20s', '<20, 20s', '<20, 20s', '<20, 20s'))
 
@@ -297,6 +424,7 @@ middle_new[["unique"]][is.na(middle_new[["unique"]])] <- "All Groups"
 
 cbbPalette <- c("#238668", "#244b8a", "#843355")
 
+  # visual
 middle_new %>%
   mutate(twenties = reorder(twenties, n_20s)) %>%
   ggplot(aes(n_20s, twenties)) +
@@ -328,10 +456,6 @@ middle_new %>%
 # 2nd draft oldest age group
 
   # setup 
-  n_over30 <- age$n[31:45]
-over_30 <- age$`Over 30`[31:45]
-
-oldest <- data.frame(n_over30, over_30)
 
 unique <- data.frame(over_30 = c('week', 'days', 'world', 'school', 'read', 'house','information'),
                      unique = c('20s, >30', '20s, >30', '20s, >30', '<20, >30', '>30', '>30', '>30'))
@@ -440,7 +564,7 @@ Inputs {.sidebar}
 
 **Draft 2:** I opted to use the pie() function because I knew how to add labels and percentages with this function, making the plot more informative and reducing cognitive load. I also changed the color palette based upon feedback from our peer review
 
-**Final version:** 
+**Final version:** I used yet another package and set of functions, which elevated the plot aesthetically (although it prints a little funny--cutting off the far right text). I kept the color palette as it allows for the most contrast between groups, and believe this plot does the best job out of the 3 pie charts of displaying the most popular topics.
 
 Column {data-width=650}
 -----------------------------------------------------------------------
@@ -450,6 +574,16 @@ Column {data-width=650}
 ```{r q2b final, warning= FALSE, echo = FALSE, message = FALSE}
 tidy_words$topic <- as.factor(tidy_words$topic)
 
+
+
+data.frame(value = c(34.95, 20.37, 6.09, 5.60, 5.30, 2.82),
+           label = c("Independent/Unknown", "Student", "Education", "Technology", "Arts", "Engineering"),
+           color = c("#8a2424", "#248a5a", "#8a7424", "#24278a", "#24808a", "#7c248a")) %>%
+  pier() %>%
+  pie.header(text = 'Six Most Popular Blog Topics In 2001-2004 Corpus', font = 'Impact',
+             size = 18, colour = 'grey',
+             location = 'top-center') %>%
+  pie.subtitle('75% of Total Topics: https://www.kaggle.com/rtatman/blog-authorship-corpus')
 
 
 ```
@@ -483,9 +617,9 @@ topics_pie <- pie(slices,labels = lbls, col= colors,
 
 ### Draft 1
 
-```{rq2b draft1, warning= FALSE, echo = FALSE, message = FALSE}
+```{rq2b draft1}
 
-topics <- tidy_words %>% 
+topics_1 <- tidy_words %>% 
   group_by(topic) %>%
   summarise(topic_totals = n()) %>%
   mutate(topic_percent = topic_totals / sum(topic_totals) * 100) %>%
@@ -498,7 +632,7 @@ topics <- tidy_words %>%
   theme_minimal()
   
 
-topics
+topics_1
 
 ```
 

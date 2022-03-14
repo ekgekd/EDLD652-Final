@@ -1,0 +1,61 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0",""
+"0","library(tidyverse)"
+"2","Registered S3 methods overwritten by 'dbplyr':
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+"
+"2","[37m-- [1mAttaching packages[22m ----------------------------------------------------------------------------------- tidyverse 1.3.1 --[39m
+"
+"2","[37m[32mâˆš[37m [34mggplot2[37m 3.3.5     [32mâˆš[37m [34mpurrr  [37m 0.3.4
+[32mâˆš[37m [34mtibble [37m 3.1.6     [32mâˆš[37m [34mdplyr  [37m 1.0.8
+[32mâˆš[37m [34mtidyr  [37m 1.1.4     [32mâˆš[37m [34mstringr[37m 1.4.0
+[32mâˆš[37m [34mreadr  [37m 2.0.2     [32mâˆš[37m [34mforcats[37m 0.5.1[39m
+"
+"2","Warning:"
+"2"," package ‘tibble’ was built under R version 4.1.2
+"
+"2","Warning:"
+"2"," package ‘dplyr’ was built under R version 4.1.2
+"
+"2","[37m-- [1mConflicts[22m -------------------------------------------------------------------------------------- tidyverse_conflicts() --
+[31mx[37m [34mdplyr[37m::[32mfilter()[37m masks [34mstats[37m::filter()
+[31mx[37m [34mdplyr[37m::[32mlag()[37m    masks [34mstats[37m::lag()[39m
+"
+"0","library(ggplot2)"
+"0","library(rio)"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"2","The following rio suggested packages are not installed: ‘feather’, ‘fst’, ‘hexView’, ‘pzfx’, ‘readODS’, ‘rmatio’
+Use 'install_formats()' to install them
+"
+"0","library(here)"
+"2","here() starts at C:/Users/ddewa/OneDrive/Documents/Oregon/edld 652/EDLD652-Final
+"
+"0","library(tidytext)"
+"0","library(RColorBrewer)"
+"0",""
+"0","#opening and removing about 90% of the rows since the file was too big to push! This code won't work since I got rid of the blogtext.csv file "
+"0","#data1 <- import(here(""blogtext.csv""))"
+"0","#data1 <- data1[-(60000:681284),]"
+"0","#write.csv(data1, ""blogtextabbr.csv"")"
+"0",""
+"0","#reading in the new df with fewer observations"
+"0","data <- read_csv(""blogtextabbr.csv"")"
+"2","New names:
+* `` -> ...1
+"
+"1","[1mRows: [22m[34m59999[39m [1mColumns: [22m[34m8[39m
+"
+"1","[36m--[39m [1mColumn specification[22m [36m----------------------------------------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (5): gender, topic, sign, date, text
+[32mdbl[39m (3): ...1, id, age
+"
+"1","
+[36mi[39m Use `spec()` to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set `show_col_types = FALSE` to quiet this message.
+"
