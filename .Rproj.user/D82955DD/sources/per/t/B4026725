@@ -3,7 +3,7 @@
     "path": "~/Oregon/edld 652/EDLD652-Final/Final_Project_Dash.Rmd",
     "project_path": "Final_Project_Dash.Rmd",
     "type": "r_markdown",
-    "hash": "1468580114",
+    "hash": "177095576",
     "contents": "",
     "dirty": false,
     "created": 1647268435287.0,
@@ -14,14 +14,14 @@
         "Source": "Source",
         "chunk_output_type": "console",
         "cursorPosition": "626,20",
-        "scrollLine": "621"
+        "scrollLine": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1647274673,
+    "lastKnownWriteTime": 1647289837,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1647274673958,
+    "last_content_update": 1647289837,
     "read_only": false,
     "read_only_alternatives": []
 }

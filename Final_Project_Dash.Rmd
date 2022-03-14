@@ -21,6 +21,10 @@ library(RColorBrewer)
 library(viridis)
 library(ggpubr)
 library(pier)
+library(patchwork)
+
+
+# devtools::install_github("thomasp85/patchwork")
 
 # devtools::install_github("mrjoh3/pier")
 
@@ -208,7 +212,7 @@ Inputs {.sidebar}
 
 **Draft 2:** I began by creating new palettes in order to show words that were used by all age groups, those only used by one age group, and those used by 2 age groups. I also tested the palette to see whether it was colorblind friendly. However, I was left feeling as though I could synthesize this information into a single plot with a better color palette. I checked whether the palettes I was using were colorblind safe, and although the first and third plots seemed okay, decided it made the most sense to use a gradient of a single color for the final plot--this was also part of the feedback we received during our presentation.
 
-**Final version:** For the final plot, I decided to combine the 3 age groups into a single figure (using ggarrange()) while keeping the axes separate, rather than creating a single figure with the same y-axis for all age groups. I also checked whether this figure was colorblind safe, and it performed better than all previous figures for protanopia, deuteranopia, and desaturated (black/white) conditions. While combining the legend may have added to cohesiveness, I kept the individual legends by each age group because it reduced cognitive load for defining fill within the individual figures.
+**Final version:** For the final plot, I decided to combine the 3 age groups into a single figure (originally using ggarrange(), then switching to patchwork package) while keeping the axes separate, rather than creating a single figure with the same y-axis for all age groups. I also checked whether this figure was colorblind safe, and it performed better than all previous figures for protanopia, deuteranopia, and desaturated (black/white) conditions. While combining the legend may have added to cohesiveness, I was having trouble doing this in a way that made sense and ended up keeping the individual legends by each age group because I felt it reduced cognitive load for defining fill within the individual figures. However, because the formatting for the dashboard didn't turn out perfect, I also saved a jpeg of the figure to our github repository.
 
 
 Column {data-width=650}
@@ -244,7 +248,7 @@ young_new[["unique1"]][is.na(young_new[["unique1"]])] <- "All Groups"
 cbbPalette1 <- c("#774d99", "#9066b2", "#ab8cc5",  "#4a305f")
 
 
-young_new <- young_new %>%
+young_plot <- young_new %>%
   mutate(under_20 = reorder(under_20, n_under20)) %>%
   ggplot(aes(n_under20, under_20)) +
   geom_col(aes(fill = unique1), alpha = 0.6) +
@@ -287,7 +291,7 @@ middle_new[["unique2"]][is.na(middle_new[["unique2"]])] <- "All Groups"
 
 cbbPalette2 <- c("#ab8cc5", "#281a33", "#4a305f")
 
-middle_new <- middle_new %>%
+middle_plot <- middle_new %>%
   mutate(twenties = reorder(twenties, n_20s)) %>%
   ggplot(aes(n_20s, twenties)) +
   geom_col(aes(fill = unique2), alpha = 0.6) +
@@ -328,7 +332,7 @@ oldest_new[["unique3"]][is.na(oldest_new[["unique3"]])] <- "All Groups"
 
 cbbPalette3 <- c("#9066b2", "#201529", "#b396ca", "#4a305f")
 
-oldest_new <- oldest_new %>%
+oldest_plot <- oldest_new %>%
   mutate(over_30 = reorder(over_30, n_over30)) %>%
   ggplot(aes(n_over30, over_30)) +
   geom_col(aes(fill = unique3), alpha = 0.6) +
@@ -356,9 +360,18 @@ oldest_new <- oldest_new %>%
   )
 
 
+final <- young_plot + middle_plot + oldest_plot + plot_layout(guides = "collect")
 
-final <- ggarrange(young_new, middle_new, oldest_new, legend = "right")
-final
+final 
+
+ggsave("final.jpg")
+
+
+  
+  
+# alternative code
+final.2 <- ggarrange(young_plot, middle_plot, oldest_plot, legend = "right")
+ggsave("final.2.jpg")
 
 ```
 
@@ -617,7 +630,7 @@ topics_pie <- pie(slices,labels = lbls, col= colors,
 
 ### Draft 1
 
-```{rq2b draft1}
+```{r q2b draft1}
 
 topics_1 <- tidy_words %>% 
   group_by(topic) %>%
